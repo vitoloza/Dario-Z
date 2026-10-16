@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conversá con un personaje animado</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#DDE4EF; --fg:#14213D; --muted:#4A5878; --panel:#F6F8FC; --line:#B7C2D8;
+  --tape:#F2C230; --btn:#14213D; --btn-fg:#F6F8FC;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0E1730;--fg:#EAF0FB;--muted:#9DAACB;--panel:#16224A;--line:#2C3C70;--btn:#F2C230;--btn-fg:#14213D}
+}
+:root[data-theme="dark"]{--bg:#0E1730;--fg:#EAF0FB;--muted:#9DAACB;--panel:#16224A;--line:#2C3C70;--btn:#F2C230;--btn-fg:#14213D}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1rem/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+.app{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);min-height:100vh}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px 8px}
+.char{width:min(100%,520px);height:auto;max-height:68vh;display:block}
+.caption{min-height:6.5rem;padding:10px 18px 20px;font-size:1.08rem;line-height:1.45;max-width:58ch;text-align:center}
+.panel{background:var(--panel);border-left:2px solid var(--line);padding:clamp(20px,4vw,48px);display:flex;flex-direction:column;gap:22px;justify-content:center}
+h1{font-size:clamp(1.9rem,3.6vw,3rem);line-height:1.05;margin:0;letter-spacing:-.02em;font-weight:700}
+.lede{margin:0;color:var(--muted);max-width:46ch}
+.asks{display:flex;flex-direction:column;gap:10px;border:0;padding:0;margin:0}
+.asks legend{font-weight:700;margin-bottom:8px;padding:0}
+.ask{font:inherit;font-weight:700;text-align:left;background:transparent;color:var(--fg);border:2px solid var(--fg);border-radius:4px;padding:12px 14px;cursor:pointer;transition:transform .12s,background .12s,color .12s}
+.ask:hover{background:var(--btn);color:var(--btn-fg);transform:translateX(4px)}
+.ask[aria-pressed="true"]{background:var(--btn);color:var(--btn-fg)}
+:focus-visible{outline:3px solid var(--tape);outline-offset:3px}
+.chip{display:inline-block;font-size:.82rem;font-weight:700;padding:2px 10px;border-radius:99px;background:var(--tape);color:#14213D;margin-bottom:6px}
+.stop{align-self:flex-start;font:inherit;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:4px 0}
+.note{font-size:.88rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin:0;max-width:56ch}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .char{max-height:48vh}
+  .panel{border-left:0;border-top:2px solid var(--line)}
+}
+@media (prefers-reduced-motion:reduce){.ask{transition:none}.ask:hover{transform:none}}
+.talk{font:inherit;font-weight:700;font-size:1.1rem;background:var(--btn);color:var(--btn-fg);border:0;border-radius:4px;padding:16px 20px;cursor:pointer;align-self:flex-start}
+.talk[aria-pressed="true"]{outline:3px solid var(--tape);outline-offset:3px}
+.status{margin:0;color:var(--muted);min-height:1.5em}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="stage" aria-label="Personaje de caricatura">
+    <svg class="char" viewBox="0 0 600 720" role="img" aria-label="Caricatura de un filósofo con rulos, barba, anteojos redondos y un martillo en la mano">
+      <circle cx="300" cy="360" r="285" fill="#F2C230" stroke="#14213D" stroke-width="8"/>
+      <g id="char" style="transform-origin:300px 640px">
+        <g fill="#3A2B24" stroke="#14213D" stroke-width="6">
+          <circle cx="160" cy="250" r="42"/><circle cx="440" cy="250" r="42"/>
+          <circle cx="170" cy="190" r="48"/><circle cx="430" cy="190" r="48"/>
+          <circle cx="215" cy="140" r="52"/><circle cx="385" cy="140" r="52"/>
+          <circle cx="270" cy="115" r="55"/><circle cx="335" cy="112" r="55"/>
+        </g>
+        <g fill="#9A9189" stroke="#14213D" stroke-width="6"><circle cx="190" cy="150" r="30"/><circle cx="410" cy="165" r="28"/></g>
+        <rect x="258" y="430" width="84" height="110" rx="22" fill="#D9966E" stroke="#14213D" stroke-width="8"/>
+        <path d="M95 720 Q95 540 300 515 Q505 540 505 720 Z" fill="#2E4A7D" stroke="#14213D" stroke-width="8"/>
+        <polygon points="250,520 300,600 350,520" fill="#F6F8FC" stroke="#14213D" stroke-width="7" stroke-linejoin="round"/>
+        <path d="M300 600 L300 720" stroke="#14213D" stroke-width="6"/>
+        <g id="arm" style="transform-origin:440px 700px">
+          <line x1="440" y1="700" x2="478" y2="570" stroke="#14213D" stroke-width="86" stroke-linecap="round"/>
+          <line x1="440" y1="700" x2="478" y2="570" stroke="#2E4A7D" stroke-width="70" stroke-linecap="round"/>
+          <rect x="467" y="395" width="22" height="215" rx="8" fill="#B7793F" stroke="#14213D" stroke-width="7"/>
+          <rect x="415" y="360" width="126" height="58" rx="10" fill="#8A93A6" stroke="#14213D" stroke-width="7"/>
+          <rect x="428" y="372" width="40" height="10" rx="5" fill="#C9CFDB"/>
+          <circle cx="478" cy="580" r="40" fill="#E8B48F" stroke="#14213D" stroke-width="7"/>
+          <path d="M440 585 Q425 570 440 555" fill="none" stroke="#14213D" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <g id="head" style="transform-origin:300px 500px">
+          <ellipse cx="150" cy="310" rx="22" ry="38" fill="#D9966E" stroke="#14213D" stroke-width="7"/>
+          <ellipse cx="450" cy="310" rx="22" ry="38" fill="#D9966E" stroke="#14213D" stroke-width="7"/>
+          <ellipse cx="300" cy="300" rx="150" ry="172" fill="#E8B48F" stroke="#14213D" stroke-width="8"/>
+          <g fill="#3A2B24" stroke="#14213D" stroke-width="6"><circle cx="225" cy="168" r="40"/><circle cx="300" cy="152" r="44"/><circle cx="375" cy="168" r="40"/></g>
+          <circle cx="262" cy="150" r="22" fill="#9A9189" stroke="#14213D" stroke-width="5"/>
+          <path d="M153 305 Q148 470 300 505 Q452 470 447 305 Q425 392 300 398 Q175 392 153 305 Z" fill="#3A2B24" stroke="#14213D" stroke-width="8" stroke-linejoin="round"/>
+          <g fill="#9A9189"><circle cx="190" cy="420" r="16"/><circle cx="240" cy="470" r="14"/><circle cx="395" cy="455" r="15"/><circle cx="355" cy="485" r="12"/></g>
+          <g id="mouth" style="transform-origin:300px 420px">
+            <path d="M255 418 Q300 462 345 418 Q300 432 255 418 Z" fill="#6B2424" stroke="#14213D" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M272 426 Q300 438 328 426" fill="none" stroke="#F6F8FC" stroke-width="6" stroke-linecap="round"/>
+          </g>
+          <g fill="#3A2B24" stroke="#14213D" stroke-width="6">
+            <ellipse cx="270" cy="392" rx="38" ry="15" transform="rotate(-14 270 392)"/>
+            <ellipse cx="330" cy="392" rx="38" ry="15" transform="rotate(14 330 392)"/>
+          </g>
+          <ellipse cx="300" cy="338" rx="23" ry="30" fill="#D9966E" stroke="#14213D" stroke-width="6"/>
+          <g fill="#FFFFFF" fill-opacity=".85" stroke="#14213D" stroke-width="9"><circle cx="235" cy="272" r="52"/><circle cx="365" cy="272" r="52"/></g>
+          <circle cx="242" cy="278" r="11" fill="#14213D"/><circle cx="358" cy="270" r="11" fill="#14213D"/>
+          <circle cx="246" cy="273" r="4" fill="#fff"/><circle cx="362" cy="265" r="4" fill="#fff"/>
+          <ellipse id="lidL" cx="235" cy="272" rx="46" ry="0" fill="#E8B48F"/>
+          <ellipse id="lidR" cx="365" cy="272" rx="46" ry="0" fill="#E8B48F"/>
+          <g fill="none" stroke="#14213D" stroke-width="9" stroke-linecap="round">
+            <circle cx="235" cy="272" r="52"/><circle cx="365" cy="272" r="52"/>
+            <path d="M287 268 Q300 252 313 268"/><path d="M184 266 L153 282 M416 266 L447 282" stroke-width="8"/>
+          </g>
+          <path d="M188 210 Q232 188 276 210" fill="none" stroke="#3A2B24" stroke-width="14" stroke-linecap="round"/>
+          <path id="browR" d="M326 200 Q372 168 412 196" fill="none" stroke="#3A2B24" stroke-width="14" stroke-linecap="round"/>
+        </g>
+      </g>
+    </svg>
+    <p class="caption" id="caption" aria-live="polite">Tocá "Hablar" y permití el micrófono para conversar.</p>
+  </section>
+  <section class="panel">
+    <h1>Conversá con un personaje animado</h1>
+    <p class="lede">Un filósofo de caricatura que responde con ideas de la obra de Darío Sztajnszrajber. Es una recreación hecha con inteligencia artificial y distingue lo documentado de lo atribuido.</p>
+    <button class="talk" id="talk" type="button" aria-pressed="false">Hablar</button>
+    <p class="status" id="status" role="status">Listo para empezar.</p>
+    <p class="note">La conversación usa tu micrófono y se procesa en ElevenLabs. Necesita HTTPS o localhost.</p>
+  </section>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
